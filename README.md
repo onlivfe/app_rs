@@ -10,6 +10,7 @@ Basic requirements:
 
 - [Git](https://git-scm.com)
 - [Rust](https://www.rust-lang.org/)
+- [Dioxus CLI](https://github.com/DioxusLabs/cli) (`cargo install dioxus-cli`)
 
 ### Building
 
@@ -19,5 +20,5 @@ Start off by cloning the project with git.
 git clone https://github.com/onlivfe/core
 ```
 
-Then open the project folder in your terminal, & run `cargo build`.
+Then open the project folder in your terminal, & run `dioxus serve --hot-reload`.
 Then get to hacking, & optionally replace the dependency in other projects by [overriding dependencies](https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html).

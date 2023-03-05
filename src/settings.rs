@@ -1,60 +1,38 @@
-use std::sync::Arc;
-
-use eframe::{egui::Ui, epaint::mutex::Mutex};
+use dioxus::prelude::*;
+use dioxus_router::Link;
 use onlivfe::PlatformType;
 use strum::IntoEnumIterator;
 
-use crate::{HistoryBehavior, UpdatablePage};
+#[must_use]
+pub fn Page(cx: Scope) -> Element {
+	let interface = use_shared_state::<crate::Onlivfe>(cx)?.read().clone();
 
-pub struct Page {
-	/// Non-UI thread needs to drop lock as quickly as possible
-	data: Arc<Mutex<Vec<PlatformType>>>,
-}
-impl From<Page> for crate::Page {
-	fn from(value: Page) -> Self { Self::Settings(value) }
-}
+	let accounts_fut = use_future(cx, (), |_| async move {
+		// TODO: Join into single future
+		PlatformType::iter().map(|platform| interface.check_auth(platform));
 
-impl Page {
-	pub fn new<Store: onlivfe::storage::OnlivfeStore + 'static>(
-		i: Arc<onlivfe_wrapper::Onlivfe<Store>>,
-	) -> Self {
-		let data: Arc<Mutex<Vec<PlatformType>>> = Arc::default();
-		let page = Self { data: data.clone() };
+		vec![PlatformType::NeosVR]
+	});
 
-		tokio::spawn(async move {
-			for platform in PlatformType::iter() {
-				if i.check_auth(platform).await.is_ok() {
-					data.lock().push(platform);
-				};
+	let Accounts = accounts_fut.value().map(|accounts| {
+		rsx! {
+			h2 {"Accounts"}
+			for account in accounts.iter() {
+				li {
+					key: "{account.as_ref()}",
+					p { "Authenticated on {account.as_ref()}" }
+				}
 			}
-		});
-
-		page
-	}
-}
-
-impl UpdatablePage for Page {
-	fn update<Store: onlivfe::storage::OnlivfeStore + 'static>(
-		&mut self, ui: &mut Ui, ctx: &eframe::egui::Context,
-		i: Arc<onlivfe_wrapper::Onlivfe<Store>>,
-	) -> Option<(crate::Page, HistoryBehavior)> {
-		ui.heading("Settings");
-		let mut any_missing_auth = false;
-		for platform in PlatformType::iter() {
-			if self.data.lock().contains(&platform) {
-				ui.label("Authenticated on ".to_owned() + platform.as_ref());
-			} else {
-				any_missing_auth = true;
-				ui.label("Not authenticated on ".to_owned() + platform.as_ref());
+			Link {
+				class: "button"
+					to: "/add_account",
+					"Add account"
 			}
 		}
-		if any_missing_auth && ui.button("Authenticate an account").clicked() {
-			return Some((
-				crate::add_account::Page::new(i).into(),
-				HistoryBehavior::Skip,
-			));
-		}
+	});
 
-		None
-	}
+	cx.render(rsx! {
+		h1 {"Settings"}
+		Accounts
+	})
 }

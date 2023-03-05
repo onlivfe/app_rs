@@ -1,30 +1,44 @@
 use std::sync::Arc;
 
-use eframe::egui::Ui;
+use dioxus::{html::*, prelude::*};
+use onlivfe::PlatformType;
+use strum::IntoEnumIterator;
 
-use crate::{HistoryBehavior, UpdatablePage};
+#[must_use]
+pub fn Page(cx: Scope) -> Element {
+	let interface = use_shared_state::<crate::Onlivfe>(cx)?.read().clone();
 
-#[derive(Debug, Clone)]
-pub struct Page {}
-impl From<Page> for crate::Page {
-	fn from(value: Page) -> Self { Self::AddAccount(value) }
-}
+	let platforms_fut = use_future(cx, (), |_| async move {
+		PlatformType::iter().map(|platform| interface.check_auth(platform));
 
-impl Page {
-	pub fn new<Store: onlivfe::storage::OnlivfeStore + 'static>(
-		i: Arc<onlivfe_wrapper::Onlivfe<Store>>,
-	) -> Self {
-		Self {}
-	}
-}
+		vec![PlatformType::VRChat, PlatformType::ChilloutVR]
+	});
 
-impl UpdatablePage for Page {
-	fn update<Store: onlivfe::storage::OnlivfeStore>(
-		&mut self, ui: &mut Ui, ctx: &eframe::egui::Context,
-		i: Arc<onlivfe_wrapper::Onlivfe<Store>>,
-	) -> Option<(crate::Page, HistoryBehavior)> {
-		ui.heading("Add account");
+	let mut selected_platform = use_state(cx, || None::<PlatformType>);
 
-		None
-	}
+	cx.render(match platforms_fut.value() {
+		Some(available_platforms) => rsx! {
+			h1 {"Add account"}
+			select {
+				for platform in available_platforms.iter() {
+					option {
+						key: "{platform.as_ref()}",
+						platform.as_ref()
+					}
+				}
+			},
+			form {
+				onsubmit: move |event| {
+						println!("Submitted! {event:?}")
+				},
+				input { name: "name", },
+				input { name: "age", },
+				input { name: "date", },
+				input { r#type: "submit", },
+			}
+		},
+		None => rsx! {
+			progress {"indeterminate progress"}
+		},
+	})
 }

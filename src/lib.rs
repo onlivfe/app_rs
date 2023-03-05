@@ -13,6 +13,8 @@
 #![allow(clippy::tabs_in_doc_comments)]
 // Not much can be done about it :/
 #![allow(clippy::multiple_crate_versions)]
+// Dioxus components
+#![allow(non_snake_case)]
 
 use std::sync::Arc;
 
@@ -20,34 +22,14 @@ pub mod about;
 pub mod add_account;
 pub mod app;
 pub mod dash;
-pub mod fonts;
 pub mod settings;
 
-pub enum Page {
-	About(crate::about::Page),
-	Settings(crate::settings::Page),
-	AddAccount(crate::add_account::Page),
-	Dash(crate::dash::Page),
-}
+static STYLES: [&str; 2] =
+	[include_str!("../res/hiq.css"), include_str!("../res/styles.css")];
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-/// How the page should get added to history
-pub enum HistoryBehavior {
-	/// Skips adding the page to history
-	Skip,
-	/// Add the page to history normally
-	Add,
-	/// Clear all of the history before the page
-	Overwrite,
-}
-
-trait UpdatablePage {
-	/// A page that can be rendered, or as egui calls it, updated.
-	fn update<Store: onlivfe::storage::OnlivfeStore + 'static>(
-		&mut self, ui: &mut eframe::egui::Ui, ctx: &eframe::egui::Context,
-		i: Arc<onlivfe_wrapper::Onlivfe<Store>>,
-	) -> Option<(crate::Page, HistoryBehavior)>;
-}
+type Onlivfe = Arc<
+	onlivfe_wrapper::Onlivfe<onlivfe_cache_store::OnlivfeCacheStorageBackend>,
+>;
 
 /// Starts the application
 ///
@@ -55,15 +37,12 @@ trait UpdatablePage {
 ///
 /// If the app encountered an error whilst starting or running
 pub fn start() -> Result<(), Box<dyn std::error::Error>> {
-	let store = onlivfe_cache_store::OnlivfeCacheStorageBackend::new("app_rs")?;
-	let interface = onlivfe_wrapper::Onlivfe::new(store)?;
-
-	let native_options = eframe::NativeOptions::default();
-	let app_creator: eframe::AppCreator = Box::new(move |creation_ctx| {
-		Box::new(app::Onlivfe::new(creation_ctx, interface))
-	});
-	eframe::run_native(env!("CARGO_PKG_NAME"), native_options, app_creator)
-		.expect("starting the app");
+	dioxus_desktop::launch_cfg(
+		app::Onlivfe,
+		dioxus_desktop::Config::new().with_custom_head(
+			STYLES.map(|style| format!("<style>{style}</style>")).join("\n"),
+		),
+	);
 
 	Ok(())
 }

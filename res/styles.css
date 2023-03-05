@@ -1,0 +1,26 @@
+html,
+body {
+	height: 100vh;
+}
+
+nav {
+	display: flex;
+	justify-content: space-between;
+}
+
+nav ul {
+	display: flex;
+	gap: var(--hiq-block-element-margin-bottom, 1rem);
+	margin-top: calc(var(--hiq-block-element-margin-bottom, 1rem) / 4);
+}
+
+:root {
+	--hiq-body-background-color: #090808;
+	--hiq-text-color: #ececec;
+	--hiq-text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+	}
+}
