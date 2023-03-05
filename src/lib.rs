@@ -37,6 +37,9 @@ type Onlivfe = Arc<
 ///
 /// If the app encountered an error whilst starting or running
 pub fn start() -> Result<(), Box<dyn std::error::Error>> {
+	onlivfe_wrapper::init(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+		.expect("Initialization failed");
+
 	dioxus_desktop::launch_cfg(
 		app::Onlivfe,
 		dioxus_desktop::Config::new().with_custom_head(
