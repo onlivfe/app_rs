@@ -8,17 +8,21 @@ homepage = "https://onlivfe.com"
 repository = "https://github.com/onlivfe/core"
 categories = ["games"]
 keywords = [
-	"onlivfe",
-	"social_vr",
-	"social_platform",
-	"social_network",
-	"social",
+    "onlivfe",
+    "social_vr",
+    "social_platform",
+    "social_network",
+    "social",
 ]
 edition = "2021"
 publish = false
 
 [lib]
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "onlivfe-desktop"
+path = "gen/bin/desktop.rs"
 
 [features]
 default = ["desktop"]
@@ -35,6 +39,7 @@ strum = { version = "0.24.1" }
 dioxus = "0.3"
 dioxus-router = "0.3"
 dioxus-desktop = { version = "0.3", optional = true }
+dioxus-mobile = { version = "0.3.0", optional = true }
 dioxus-web = { version = "0.3.1", optional = true }
 mobile-entry-point = { version = "0.1.0", optional = true }
 
@@ -45,3 +50,20 @@ codegen-units = 1
 lto = "fat"
 panic = "abort"
 strip = true
+
+[package.metadata.cargo-android]
+app-activity-name = ".MainActivity"
+app-dependencies = [
+    "androidx.webkit:webkit:1.4.0",
+    "androidx.appcompat:appcompat:1.5.0",
+    "com.google.android.material:material:1.6.1",
+]
+project-dependencies = ["org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"]
+app-plugins = ["org.jetbrains.kotlin.android"]
+app-permissions = ["android.permission.INTERNET"]
+app-theme-parent = "Theme.MaterialComponents.DayNight.DarkActionBar"
+
+[package.metadata.cargo-android.env-vars]
+WRY_ANDROID_PACKAGE = "com.onlivfe.app"
+WRY_ANDROID_LIBRARY = "onlivfe_app"
+WRY_ANDROID_KOTLIN_FILES_OUT_DIR = "<android-project-dir>/app/src/main/kotlin/com/onlivfe"

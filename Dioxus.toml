@@ -9,7 +9,7 @@ name = "Onlivfe"
 default_platform = "desktop"
 
 # Web `build` & `serve` dist path
-out_dir = "dist"
+out_dir = "gen/dist"
 
 # resource (static) file folder
 asset_dir = "res"

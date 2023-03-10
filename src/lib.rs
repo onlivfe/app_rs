@@ -16,6 +16,7 @@
 // Dioxus components
 #![allow(non_snake_case)]
 
+use std::fs::{canonicalize, read};
 use std::sync::Arc;
 
 pub mod about;
@@ -36,7 +37,7 @@ type Onlivfe = Arc<
 /// # Errors
 ///
 /// If the app encountered an error whilst starting or running
-pub fn start() -> Result<(), Box<dyn std::error::Error>> {
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
 	onlivfe_wrapper::init(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
 		.expect("Initialization failed");
 
@@ -48,4 +49,26 @@ pub fn start() -> Result<(), Box<dyn std::error::Error>> {
 	);
 
 	Ok(())
+}
+fn stop_unwind<F: FnOnce() -> T, T>(f: F) -> T {
+	match std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
+		Ok(t) => t,
+		Err(err) => {
+			eprintln!("attempt to unwind out of `rust` with err: {:?}", err);
+			std::process::abort()
+		}
+	}
+}
+
+/// Starts the app
+///
+/// # Panics
+///
+/// If app crashes
+//#[no_mangle]
+#[inline(never)]
+pub extern "C" fn start_app() {
+	//#[cfg(target_os = "android")]
+	//wry::android_binding!(com_onlivfe, onlivfe, _start_app);
+	stop_unwind(|| main().unwrap());
 }
