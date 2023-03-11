@@ -1,5 +1,5 @@
 [package]
-name = "onlivfe_app"
+name = "app"
 version = "0.1.0"
 description = "Onlivfe's Rust native app"
 authors = ["ljoonal"]
@@ -17,6 +17,8 @@ keywords = [
 edition = "2021"
 publish = false
 
+build = "build.rs"
+
 [lib]
 crate-type = ["staticlib", "cdylib", "rlib"]
 
@@ -28,7 +30,7 @@ path = "gen/bin/desktop.rs"
 default = ["desktop"]
 desktop = ["dioxus-desktop"]
 web = ["dioxus-web"]
-mobile = ["mobile-entry-point"]
+mobile = []
 
 [dependencies]
 onlivfe = { path = "../core/onlivfe" }
@@ -38,10 +40,14 @@ strum = { version = "0.24.1" }
 
 dioxus = "0.3"
 dioxus-router = "0.3"
+
+[target.'cfg(target_os = "android")'.dependencies]
+dioxus-mobile = { version = "0.3.0" }
+mobile-entry-point = { version = "0.1.0" }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
 dioxus-desktop = { version = "0.3", optional = true }
-dioxus-mobile = { version = "0.3.0", optional = true }
 dioxus-web = { version = "0.3.1", optional = true }
-mobile-entry-point = { version = "0.1.0", optional = true }
 
 [profile.release]
 # Optimizing mostly for size.

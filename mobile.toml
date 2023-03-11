@@ -1,5 +1,5 @@
 [app]
-name = "onlivfe"
+name = "app"
 stylized-name = "Onlivfe"
 domain = "onlivfe.com"
-template-pack = "wry"
+template-pack = "winit"

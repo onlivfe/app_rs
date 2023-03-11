@@ -25,4 +25,10 @@ Then get to hacking, & optionally replace the dependency in other projects by [o
 
 ### Android
 
-Possibly need to add `abiFilters += listOf("arm64-v8a")` under `create("arm")` branch in `:app`'s '`build.gradle.kts`.
+<!--Possibly need to add `abiFilters += listOf("arm64-v8a")` under `create("arm")` branch in `:app`'s '`build.gradle.kts`.-->
+```sh
+cargo install --git https://github.com/tauri-apps/tauri-mobile
+cargo mobile init
+# Or `cargo android build` if you don't have a device in ADB
+cargo android run
+```
